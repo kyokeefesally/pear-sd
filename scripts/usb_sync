@@ -5,7 +5,7 @@
 # script will execute upon specific USB thumb drive being plugged into the RPi
 # USB specifity is defined in udev rule by USB drive unique serial_id
 
-/usr/bin/sudo -u root /home/pirate/pear-sd/CODE/scripts/slow_flash &
+/usr/bin/sudo -u root /home/pirate/pear-sd/scripts/slow_flash &
 pid=$!
 echo "$pid" >>/home/pirate/pear-sd/logs/led.log
 
@@ -71,6 +71,6 @@ echo ""  >>/home/pirate/pear-sd/logs/usb_sync.log
 
 sudo kill $pid
 
-/usr/bin/sudo -u root /home/pirate/pear-sd/CODE/scripts/stop_flash
+/usr/bin/sudo -u root /home/pirate/pear-sd/scripts/stop_flash
 
-/usr/bin/sudo -u root /home/pirate/pear-sd/CODE/scripts/fast_flash
+/usr/bin/sudo -u root /home/pirate/pear-sd/scripts/fast_flash
