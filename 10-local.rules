@@ -1,11 +1,11 @@
 # pair specific usb flash drive with node, give it a persistent name and execute RUN script upon add event
-KERNEL=="sd*1", ATTRS{serial}=="874D2535", ACTION=="add", SYMLINK+="janus_usb", RUN+="/home/pirate/pear-sd/CODE/scripts/usb_sync"
+KERNEL=="sd*1", ATTRS{serial}=="874D2535", ACTION=="add", SYMLINK+="janus_usb", RUN+="/home/pirate/pear-sd/scripts/usb_sync"
 
 # persistent name for physical usb port 1.2
 KERNEL=="sd*1", ATTRS{devpath}=="1.2", SYMLINK+="external_usb"
 
 # script to run when usb/sd CONNECTED to usb 1.2
-KERNEL=="sd*1", ATTRS{devpath}=="1.2", ACTION=="add", RUN+="/home/pirate/pear-sd/CODE/scripts/get_usb_update"
+KERNEL=="sd*1", ATTRS{devpath}=="1.2", ACTION=="add", RUN+="/home/pirate/pear-sd/scripts/get_usb_update"
 
 # script to run when usb/sd DISCONNECTED from usb 1.2
-KERNEL=="sd*1", ATTRS{devpath}=="1.2", ACTION=="remove", RUN+="/home/pirate/pear-sd/CODE/scripts/get_usb_update"
+KERNEL=="sd*1", ATTRS{devpath}=="1.2", ACTION=="remove", RUN+="/home/pirate/pear-sd/scripts/get_usb_update"
