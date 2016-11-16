@@ -53,7 +53,7 @@ def get_paired_status(serial_value):
     global PAIRED_STATUS
 
     # read paired_devices file to get serials
-    datafile = open('/home/pirate/paired_devices.txt').read()
+    datafile = open('/home/pirate/pear-sd/paired_devices.txt').read()
 
     # check if paired
     if serial_value in datafile and serial_value !='':
@@ -73,7 +73,7 @@ def pair_unpair(serial_value, node_command):
     '''
 
     if node_command in 'pair':
-        with open('/home/pirate/paired_devices.txt', 'a+') as myfile:
+        with open('/home/pirate/pear-sd/paired_devices.txt', 'a+') as myfile:
             myfile.write(serial_value + '\n')
             myfile.close()
 
@@ -81,7 +81,7 @@ def pair_unpair(serial_value, node_command):
 
     elif node_command in 'unpair':
         print("I SHOULD BE UNPAIRING NOW")
-        with open('/home/pirate/paired_devices.txt', 'a+') as myfile:
+        with open('/home/pirate/pear-sd/paired_devices.txt', 'a+') as myfile:
             lines = myfile.readlines()
             myfile.seek(0)
             for line in lines:

@@ -1,4 +1,4 @@
 #!/bin/bash
 
 
-/usr/bin/sudo -u root /home/pirate/CODE/SOCKETIO/V2/usb_client_v2.py >>/home/pirate/CODE/SOCKETIO/V2/udev.log
+/usr/bin/sudo -u root /home/pirate/pear-sd/CODE/usb_client.py >>/home/pirate/pear-sd/CODE/logs/udev.log

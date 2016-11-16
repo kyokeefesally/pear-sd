@@ -22,7 +22,7 @@ app.config['SECRET_KEY'] = 'secret!'
 app.config['DEBUG'] = True
 
 # Extra files to monitor for reloader
-extra_files = ['static/js/application.js', 'templates/index.html',]
+extra_files = ['static/js/app.js', 'templates/index.html',]
 
 #turn the flask app into a socketio app
 socketio = SocketIO(app, debug=True)
@@ -37,7 +37,7 @@ PAIRED_STATUS = "unknown"
 def index():
 
     #only by sending this page first will the client be connected to the socketio instance
-    return render_template('index_v2.html')
+    return render_template('index.html')
 
 
 #####################################################################
@@ -94,7 +94,7 @@ def usb_update(message):
     USB_STATE = message['usb_state']
 
     # read paired_devices file to get serials
-    #datafile = open('/home/pirate/paired_devices.txt').read()
+    #datafile = open('/home/pirate/pear-sd/paired_devices.txt').read()
 
     # Check if paired
     # if usb is connected, check if paired
@@ -172,6 +172,6 @@ def web_disconnect():
 
 
 if __name__ == '__main__':
-    socketio.run(app, host='0.0.0.0', use_reloader=True, debug=True, extra_files=['static/js/application.js', 'templates/index.html',], port=5000)
+    socketio.run(app, host='0.0.0.0', use_reloader=True, debug=True, extra_files=['static/js/app.js', 'templates/index.html',], port=5000)
 
 
