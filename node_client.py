@@ -64,6 +64,8 @@ def get_paired_status(serial_value):
     return PAIRED_STATUS
 
 def pair_unpair(serial_value, node_command):
+
+    global PAIRED_STATUS
     '''
     # parse message from server for node_command
     message_string = json.dumps(message)

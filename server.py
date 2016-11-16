@@ -11,7 +11,6 @@ from random import random
 from time import sleep
 from threading import Thread, Event
 import subprocess
-from livereload import Server, shell
 import os.path
 
 # Start with a basic flask app
@@ -60,7 +59,7 @@ def web_connect():
 
 
 #####################################################################
-#  Events when usb clients connect to server (namespace='/web')
+#  Events when usb clients connect to server (namespace='/usb')
 #####################################################################
 @socketio.on('connect', namespace='/usb')
 def usb_connect():
@@ -79,6 +78,26 @@ def usb_connect():
 
     else:
         emit('notify_web_clients', {'serial_value': SERIAL, 'paired_status': PAIRED_STATUS, 'usb_state': USB_STATE}, broadcast=True, namespace='/web') 
+
+
+#####################################################################
+#  Events when usb clients connect to server (namespace='/node')
+#####################################################################
+@socketio.on('connect', namespace='/node')
+def usb_connect():
+    global USB_STATE, SERIAL, PAIRED_STATUS
+
+    print('Node Client Connected')
+    print("{usb_state: '" + USB_STATE + "', paired_status: '" + PAIRED_STATUS + "', serial_value: '" + SERIAL + "'}")
+
+    if (USB_STATE or SERIAL or PAIRED_STATUS) in "unknown": 
+
+        # pull usb client for usb value and paired status
+        emit('server_pull_usb', broadcast=True, namespace='/usb')
+
+    else:
+        emit('notify_web_clients', {'serial_value': SERIAL, 'paired_status': PAIRED_STATUS, 'usb_state': USB_STATE}, broadcast=True, namespace='/web') 
+
 
 
 #####################################################################
