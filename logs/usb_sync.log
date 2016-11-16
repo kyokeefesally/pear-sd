@@ -1,0 +1,18 @@
+usb added event: 11/16/16 16:33:46
+usb mounted: 11/16/16 16:33:46
+
+rsync:
+**************************************************
+sending incremental file list
+credentials/
+credentials/credentials.json
+
+sent 143 bytes  received 39 bytes  364.00 bytes/sec
+total size is 17  speedup is 0.09
+**************************************************
+
+rsync'd credentials: 11/16/16 16:33:46
+usb unmounted 11/16/16 16:33:47
+
+--------------------------------------------------------------------
+
