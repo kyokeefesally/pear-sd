@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/socket.io/1.3.5/socket.io.min.js"></script>
+    <script src="static/js/app_v2.js"></script>
+
+    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+</head>
+<body>
+<div class="jumbotron">
+    <h1>Asynchronous Flask Communicationnn</h1>
+</div>
+
+<div class="container" id="content">
+    <div class="row">
+        <h3>USB List:</h3>
+        <dl>
+            <dt>Paired Status:</dt>
+            <dd class="paired_status"></dd>
+            <br>
+            <dt>Serial:</dt>
+            <dd class="serial_value"></dd>
+            <br>
+            <dt>Connection State:</dt>
+            <dd class="usb_state"></dd>
+        </dl>
+        <div id="log"></div>
+        <button type="button" id="not_paired" class="btn btn-primary" value="pair usb" style="display: none;">PAIR USB</button>
+        <button type="button" id="paired" class="btn btn-primary" value="unpair usb" style="display: none;">UNPAIR USB</button>
+        <!--<input type="button" id="server_pull" value="PULL SERVER">-->
+    </div>
+</div>
+
+
+
+</body>
+</html>
