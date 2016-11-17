@@ -1,43 +1,23 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
-import re
-from setuptools import setup, find_packages
 import os, sys
 
-'''
-install_reqs = parse_requirements(os.getcwd())
-print(install_reqs)
-reqs = [str(ir.req) for ir in install_reqs]
-'''
+# for both
+def install_pip_packages():
+    os.system("sudo pip install -r requirements.txt")
 
-'''
-name='pear-sd',
-description='USB pairing service for Janus nodes',
-author='Kyle O\'Keefe-Sally',
-author_email='kyle@wework.com',
-url='https://github.com/kyokeefesally/pear-sd',
-packages=find_packages(exclude=('tests', 'docs'))
-'''
+# for both, but device_type dependent
+def create_directories(device_type):
+    
+    # folders to use if device_type != node (i.e. == client)
+    folders = ['/logs/', '/usb_mount/']
 
-setup(
-
-    install_requires=[
-        'Flask >= 0.11.1',
-        'Flask_SocketIO >= 2.7.2',
-        'socketIO_client >= 0.7.0',
-        'argparse >= 1.2.1'
-    ]
-
-)
-
-
-def create_directories():
+    # but, if device_type == node, create these folders
+    if device_type == 'node':
+        folders = ['/logs/', '/usb_mount/', '/credentials/']
 
     # get current working directory
     cwd = os.getcwd()
-
-    folders = ['/logs/', '/usb_mount/', '/credentials/']
 
     for folder in folders:
 
@@ -47,16 +27,22 @@ def create_directories():
         # create directory if doesn't exist
         if not os.path.exists(full_path):
             os.mkdir(full_path)
+            # add gitkeep to directory
+            file_name = '.gitkeep'
+            with open(file_name, 'a+') as new_file:
+                new_file.write('###')
+                new_file.close()
             print('created directory: ' + full_path)
 
 
+# node only
 def create_paired_devices_file():
 
     # get current workign directory
     cwd = os.getcwd()
 
     # files to create
-    files = ['paired_devices.txt', 'kyle.txt']
+    files = ['paired_devices.txt']
 
     # create files if don't already exist
     for f in files:
@@ -65,21 +51,92 @@ def create_paired_devices_file():
         print('created file: ' + new_file)
 
 
+# client only
+def create_client_udev_rules():
 
-if sys.argv[-1] == 'node':
-    print("node")
-    os.sys("sudo python setup.py install")
+    # udev rule file to create if doesn't exist
+    udev_rule_path = '/etc/udev/rules.d/10-local.rules'
+
+    # get current working directory
+    cwd = os.getcwd()
+
+    # temp udev rule file
+    tmp = '10-local.rules'
+
+    # udev rules
+    rules = [
+        '# persistent name for physical usb port 1.2 (created by pear-sd)\n',
+        'KERNEL=="sd*1", ATTRS{devpath}=="1.2", SYMLINK+="external_usb"\n',
+        '\n',
+        '# script to run when usb/sd CONNECTED to usb 1.2 (created by pear-sd)\n',
+        'KERNEL=="sd*1", ATTRS{devpath}=="1.2", ACTION=="add", RUN+="' + cwd + '/scripts/get_usb_update"\n',
+        '\n',
+        '# script to run when usb/sd DISCONNECTED from usb 1.2 (created by pear-sd)\n',
+        'KERNEL=="sd*1", ATTRS{devpath}=="1.2", ACTION=="remove", RUN+="' + cwd + '/scripts/get_usb_update"\n'
+    ]
+
+    # create temporary file from scratch
+    with open(tmp, 'a+') as temp:
+        # iterate over rules list
+        for rule in rules:
+            # write one line at a time
+            temp.write(rule)
+        # close file when done writing
+        temp.close()
+
+    temp_file = open(tmp, 'rt').read()
+
+
+    # check if udev rule file already exists
+    if not os.path.exists(udev_rule_path):
+        # if file DOES NOT exist do this
+
+        # move tmp file to /etc/udev/rules.d
+        os.system("sudo mv " + tmp + " " + udev_rule_path)
+
+        # reset udev rules
+        os.system("sudo udevadm control --reload-rules")
+
+    # otherwise, check if file DOES exist
+    elif os.path.exists(udev_rule_path):
+        # if file DOES exist do this:
+        # open and read existing file
+        with open(udev_rule_path, 'rt') as existing_file:
+            # concat existing file and new tmp file
+            new_file = existing_file.read() + '\n\n' + temp_file + '\n'
+            with open(tmp, 'wt') as output:
+                output.write(new_file)
+
+        # move tmp file to /etc/udev/rules.d
+        os.system("sudo mv " + tmp + " " + udev_rule_path)
+
+        # reset udev rules
+        os.system("sudo udevadm control --reload-rules")
+
+
+
+
+
+if sys.argv[-1] == '--node':
+    # let user know what's going on
+    print("setting up pear-sd for device type: NODE")
+    
+    # run setup functions for NODE
+    install_pip_packages()
+    create_directories('node')
+    create_paired_devices_file()
+
+    # exit
     sys.exit()
 
 
-if sys.argv[-1] == 'kyle':
-    print("kyle")
-    os.sys("sudo python setup.py install")
-    sys.exit()
+if sys.argv[-1] == '--client':
+    print("setting up pear-sd for device type: USB CLIENT")
 
-'''
-if sys.argv[-1] == 'install':
-    print("install subscript")
-    #os.sys("python setup.py install")
+    # run setup functions for CLIENT
+    install_pip_packages()
+    create_directories('client')
+    create_client_udev_rules()
+
+    # exit
     sys.exit()
-'''
