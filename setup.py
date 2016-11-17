@@ -10,10 +10,10 @@ def install_pip_packages():
 def create_directories(device_type):
     
     # folders to use if device_type != node (i.e. == client)
-    folders = ['/logs/', '/usb_mount/']
+    folders = ['/logs/']
 
     # but, if device_type == node, create these folders
-    if device_type == 'node':
+    if device_type != 'server':
         folders = ['/logs/', '/usb_mount/', '/credentials/']
 
     # get current working directory
@@ -52,7 +52,7 @@ def create_paired_devices_file():
 
 
 # client only
-def create_client_udev_rules():
+def create_udev_rules():
 
     # udev rule file to create if doesn't exist
     udev_rule_path = '/etc/udev/rules.d/10-local.rules'
@@ -113,30 +113,75 @@ def create_client_udev_rules():
         # reset udev rules
         os.system("sudo udevadm control --reload-rules")
 
+def remove_unused_directories(device_type):
+    # remove templates and static directories for NODE and CLIENT (no web UI needed)
+    if device_type != 'server':
+        os.system("sudo rm -r templates static")
 
+def remove_unused_scripts(device_type):
 
+    # keep only server.py
+    if device_type == 'server':
+        os.system("sudo rm usb_client.py node_client.py")
 
+    # keep only usb_client.py
+    elif device_type == 'client':
+        os.system("sudo rm server.py node_client.py")
 
-if sys.argv[-1] == '--node':
+    # keep only node_client.py
+    elif device_type == 'node':
+        os.system("sudo rm usb_client.py server.py")
+        
+
+# setup.py --server runs this
+if sys.argv[-1] == '--server':
+    
+    device_type = 'server'
+
     # let user know what's going on
-    print("setting up pear-sd for device type: NODE")
+    print("setting up pear-sd for device type: SERVER")
     
     # run setup functions for NODE
     install_pip_packages()
-    create_directories('node')
-    create_paired_devices_file()
+    create_directories(device_type)
+    remove_unused_directories(device_type)
+    remove_unused_scripts(device_type)
 
     # exit
     sys.exit()
 
 
+# setup.py --node runs this
+if sys.argv[-1] == '--node':
+
+    device_type = 'node'
+
+    # let user know what's going on
+    print("setting up pear-sd for device type: NODE")
+    
+    # run setup functions for NODE
+    install_pip_packages()
+    create_directories(device_type)
+    create_paired_devices_file()
+    remove_unused_directories(device_type)
+    remove_unused_scripts(device_type)
+
+    # exit
+    sys.exit()
+
+# setup.py --client runs this
 if sys.argv[-1] == '--client':
+
+    device_type = 'client'
+
     print("setting up pear-sd for device type: USB CLIENT")
 
     # run setup functions for CLIENT
     install_pip_packages()
-    create_directories('client')
-    create_client_udev_rules()
+    create_directories(device_type)
+    create_udev_rules()
+    remove_unused_directories(device_type)
+    remove_unused_scripts(device_type)
 
     # exit
     sys.exit()
