@@ -5,9 +5,9 @@
 # script will execute upon specific USB thumb drive being plugged into the RPi
 # USB specifity is defined in udev rule by USB drive unique serial_id
 
-/usr/bin/sudo -u root /home/pirate/pear-sd/scripts/slow_flash &
+/usr/bin/sudo -u root /home/pirate/CODE/pear-sd/scripts/slow_flash &
 pid=$!
-echo "$pid" >>/home/pirate/pear-sd/logs/led.log
+echo "$pid" >>/home/pirate/CODE/pear-sd/logs/led.log
 
 # date/time stamp for logs
 timestamp() {
@@ -15,62 +15,62 @@ timestamp() {
 }
 
 # usb mount directory
-DIRECTORY="/home/pirate/pear-sd/usb_mount"
+DIRECTORY="/home/pirate/CODE/pear-sd/usb_mount"
 
 # script will executed upon detection of USB ADDED udev event
 # print in log that usb ADDED was successfully detected
-echo "usb added event: $(timestamp)"  >>/home/pirate/pear-sd/logs/usb_sync.log
+echo "usb added event: $(timestamp)"  >>/home/pirate/CODE/pear-sd/logs/usb_sync.log
 
 # check to see if mount point exists
 if [ ! -d $DIRECTORY ]; then
 	# print in log that directory DOES NOT exist
-	echo "directory DOES NOT exist" >>/home/pirate/pear-sd/logs/usb_sync.log
+	echo "directory DOES NOT exist" >>/home/pirate/CODE/pear-sd/logs/usb_sync.log
 	# create mount point
-	mkdir /home/pirate/pear-sd/usb_mount
-	echo "mount point '/home/pirate/pear-sd/usb_mount' created"
+	mkdir /home/pirate/CODE/pear-sd/usb_mount
+	echo "mount point '/home/pirate/CODE/pear-sd/usb_mount' created"
 fi
 
 # make sure usb is unmounted
 # must run as sudo to unmount
-#sudo umount /home/pirate/pear-sd/usb_mount
+#sudo umount /home/pirate/CODE/pear-sd/usb_mount
 
-# mount janus_usb to mount point /home/pirate/pear-sd/usb_mount
+# mount janus_usb to mount point /home/pirate/CODE/pear-sd/usb_mount
 # must run as sudo to mount
-sudo mount /dev/janus_usb /home/pirate/pear-sd/usb_mount
+sudo mount /dev/janus_usb /home/pirate/CODE/pear-sd/usb_mount
 
 # print in log that usb was successfully mounted
-echo "usb mounted: $(timestamp)" >>/home/pirate/pear-sd/logs/usb_sync.log
+echo "usb mounted: $(timestamp)" >>/home/pirate/CODE/pear-sd/logs/usb_sync.log
 
-echo "" >>/home/pirate/pear-sd/logs/usb_sync.log
-echo "rsync:" >>/home/pirate/pear-sd/logs/usb_sync.log
-echo "**************************************************" >>/home/pirate/pear-sd/logs/usb_sync.log
+echo "" >>/home/pirate/CODE/pear-sd/logs/usb_sync.log
+echo "rsync:" >>/home/pirate/CODE/pear-sd/logs/usb_sync.log
+echo "**************************************************" >>/home/pirate/CODE/pear-sd/logs/usb_sync.log
 
 # rsync credentials directory from usb to local R Pi directory
-rsync -avz /home/pirate/pear-sd/usb_mount/credentials /home/pirate/pear-sd/ >>/home/pirate/pear-sd/logs/usb_sync.log
+rsync -avz /home/pirate/CODE/pear-sd/usb_mount/credentials /home/pirate/CODE/pear-sd/ >>/home/pirate/CODE/pear-sd/logs/usb_sync.log
 
-echo "**************************************************" >>/home/pirate/pear-sd/logs/usb_sync.log
+echo "**************************************************" >>/home/pirate/CODE/pear-sd/logs/usb_sync.log
 
 # log formatting
-echo ""  >>/home/pirate/pear-sd/logs/usb_sync.log
+echo ""  >>/home/pirate/CODE/pear-sd/logs/usb_sync.log
 
 # print in log that rsync was successful
-echo "rsync'd credentials: $(timestamp)" >>/home/pirate/pear-sd/logs/usb_sync.log
+echo "rsync'd credentials: $(timestamp)" >>/home/pirate/CODE/pear-sd/logs/usb_sync.log
 
 # unmount usb mount point
 # must run as sudo to unmount
-sudo umount /home/pirate/pear-sd/usb_mount
+sudo umount /home/pirate/CODE/pear-sd/usb_mount
 
 # print in log that unmount was successful
-echo "usb unmounted $(timestamp)" >>/home/pirate/pear-sd/logs/usb_sync.log
+echo "usb unmounted $(timestamp)" >>/home/pirate/CODE/pear-sd/logs/usb_sync.log
 
 # formatting for logs
-echo ""  >>/home/pirate/pear-sd/logs/usb_sync.log
-echo "--------------------------------------------------------------------" >>/home/pirate/pear-sd/logs/usb_sync.log
-echo ""  >>/home/pirate/pear-sd/logs/usb_sync.log
+echo ""  >>/home/pirate/CODE/pear-sd/logs/usb_sync.log
+echo "--------------------------------------------------------------------" >>/home/pirate/CODE/pear-sd/logs/usb_sync.log
+echo ""  >>/home/pirate/CODE/pear-sd/logs/usb_sync.log
 
 
 sudo kill $pid
 
-/usr/bin/sudo -u root /home/pirate/pear-sd/scripts/stop_flash
+/usr/bin/sudo -u root /home/pirate/CODE/pear-sd/scripts/stop_flash
 
-/usr/bin/sudo -u root /home/pirate/pear-sd/scripts/fast_flash
+/usr/bin/sudo -u root /home/pirate/CODE/pear-sd/scripts/fast_flash
