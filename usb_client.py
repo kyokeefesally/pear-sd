@@ -3,7 +3,6 @@
 from socketIO_client import SocketIO, LoggingNamespace, BaseNamespace
 import logging
 import argparse
-import time
 import subprocess
 
 logging.getLogger('requests').setLevel(logging.WARNING)
