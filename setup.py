@@ -117,21 +117,29 @@ def remove_unused_directories(device_type):
     # remove templates and static directories for NODE and CLIENT (no web UI needed)
     if device_type != 'server':
         os.system("sudo rm -r templates static")
+        print('removed directory: /templates')
+        print('removed directory: /static')
 
 def remove_unused_scripts(device_type):
 
     # keep only server.py
     if device_type == 'server':
         os.system("sudo rm usb_client.py node_client.py")
+        print('removed script: usb_client.py')
+        print('removed script: node_client.py')
 
     # keep only usb_client.py
     elif device_type == 'client':
         os.system("sudo rm server.py node_client.py")
+        print('removed script: server.py')
+        print('removed script: node_client.py')
 
     # keep only node_client.py
     elif device_type == 'node':
         os.system("sudo rm usb_client.py server.py")
-        
+        print('removed script: server.py')
+        print('removed script: usb_client.py')
+
 
 # setup.py --server runs this
 if sys.argv[-1] == '--server':
