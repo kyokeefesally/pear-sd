@@ -4,6 +4,7 @@ from socketIO_client import SocketIO, LoggingNamespace, BaseNamespace
 import logging
 import argparse
 import subprocess
+import os, sys
 
 logging.getLogger('requests').setLevel(logging.WARNING)
 logging.basicConfig(level=logging.DEBUG)
@@ -13,7 +14,7 @@ class UsbNamespace(BaseNamespace):
     def on_aaa_response(self, *args):
         print('on_aaa_response', args)
 
-SOCKETIO = SocketIO('localhost', 5000)
+SOCKETIO = SocketIO('10.31.77.36', 5000)
 USB_NAMESPACE = SOCKETIO.define(UsbNamespace, '/usb')
 DATA = {u'server_message': u'no message'}
 USB_STATE = "unknown"
@@ -64,12 +65,35 @@ def send_socket_message(usb_values):
     # send message to server
     USB_NAMESPACE.emit('send_usb_update', {'serial_value': serial_value, 'usb_state': usb_state})
 
+def initialize_usb(*message):
+    # get current working directory
+    cwd = os.getcwd()
+
+    # usb mount directory
+    mount_directory = cwd + '/usb_mount'
+
+    # usb credentials directory
+    credentials_directory = mount_directory + '/credentials'
+
+    # mount USB
+    os.system('sudo mount /dev/external_usb ' + mount_directory)
+
+    # check if /credentials exists
+    if not os.path.exists(credentials_directory):
+        # if /credentials directory DOES NOT exist do this:
+        # make credentials directory
+        os.mkdir(credentials_directory)
+
+    # unmount USB
+    os.system('sudo umount ' + mount_directory)
+
 
 def create_socket(persistent):
     global SOCKETIO, USB_NAMESPACE
 
     if persistent:
         USB_NAMESPACE.on('server_pull_usb', notify_value)
+        USB_NAMESPACE.on('initialize_usb', initialize_usb)
         SOCKETIO.wait()
 
     else:
