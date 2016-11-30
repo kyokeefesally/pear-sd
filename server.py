@@ -169,6 +169,16 @@ def paired_update(message):
     emit('notify_web_clients', {'serial_value': SERIAL, 'paired_status': PAIRED_STATUS, 'usb_state': USB_STATE}, broadcast=True, namespace='/web')
 
 
+#####################################################################
+#  Initialize USB
+#####################################################################
+@socketio.on('initialize_usb', namespace='/node')
+def initialize_usb(message):
+
+    # pull usb client for usb value and paired status
+    emit('initialize_usb', {'server_message': 'INITIALIZING'}, broadcast=True, namespace='/usb')
+
+
 @socketio.on('client_pull_usb_values', namespace='/web')
 def web_pull(message):
 
