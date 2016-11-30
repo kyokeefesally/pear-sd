@@ -125,6 +125,7 @@ def remove_unused_scripts(device_type):
     # keep only server.py
     if device_type == 'server':
         os.system("sudo rm usb_client.py node_client.py")
+        os.system("sudo apt-get -y install libevent-dev python-all-dev")
         print('removed script: usb_client.py')
         print('removed script: node_client.py')
 
@@ -141,6 +142,13 @@ def remove_unused_scripts(device_type):
         print('removed script: usb_client.py')
 
 
+def install_pip():
+    os.system('sudo apt-get -y install python-pip')
+    os.system('sudo easy_install pip')
+
+def install_rsync():
+    os.system('sudo apt-get -y install rsync')
+
 # setup.py --server runs this
 if sys.argv[-1] == '--server':
     
@@ -150,6 +158,7 @@ if sys.argv[-1] == '--server':
     print("setting up pear-sd for device type: SERVER")
     
     # run setup functions for NODE
+    install_pip()
     install_pip_packages()
     create_directories(device_type)
     remove_unused_directories(device_type)
@@ -168,7 +177,9 @@ if sys.argv[-1] == '--node':
     print("setting up pear-sd for device type: NODE")
     
     # run setup functions for NODE
+    install_pip()
     install_pip_packages()
+    install_rsync()
     create_directories(device_type)
     create_paired_devices_file()
     remove_unused_directories(device_type)
@@ -185,7 +196,9 @@ if sys.argv[-1] == '--client':
     print("setting up pear-sd for device type: USB CLIENT")
 
     # run setup functions for CLIENT
+    install_pip()
     install_pip_packages()
+    install_rsync()
     create_directories(device_type)
     create_udev_rules()
     remove_unused_directories(device_type)
