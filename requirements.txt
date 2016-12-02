@@ -4,6 +4,8 @@ socketIO_client >= 0.7.0
 argparse >= 1.2.1
 eventlet >= 0.19.0
 gevent
+RPi.GPIO
+RPLCD
 python-socketio >= 1.6.0
 Werkzeug >= 0.11.11
 Jinja2 >= 2.8
