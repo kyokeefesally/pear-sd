@@ -8,6 +8,18 @@ A Flask-SocketIO server to pair usb drives with Janus nodes
 from flask_socketio import SocketIO, emit
 from flask import Flask, render_template, url_for, copy_current_request_context, session, request
 
+import socket
+import fcntl
+import struct
+
+import RPi.GPIO as GPIO
+from RPLCD import CharLCD, BacklightMode
+
+import os
+
+# remove GPIO warnings for LCD screen
+#GPIO.setwarnings(False)
+
 # Start with a basic flask app
 app = Flask(__name__)
 
@@ -35,6 +47,14 @@ def index():
 
 
 #####################################################################
+#  Events when server comes online (no namespace)
+#####################################################################
+@socketio.on('connect')
+def server_connect():
+    #print("SERVER CONNECTED")
+    write_to_lcd('eth0')
+
+#####################################################################
 #  Events when web clients connect to server (namespace='/web')
 #####################################################################
 @socketio.on('connect', namespace='/web')
@@ -48,9 +68,13 @@ def web_connect():
 
         # pull usb client for usb value and paired status
         emit('server_pull_usb', broadcast=True, namespace='/usb')
+        #emit('update_lcd', {'serial_value': SERIAL}, broadcast=True, namespace='/usb') 
+        #emit('update_lcd', broadcast=True, namespace='/usb')
 
     else:
-        emit('notify_web_clients', {'serial_value': SERIAL, 'paired_status': PAIRED_STATUS, 'usb_state': USB_STATE}, broadcast=True, namespace='/web') 
+        emit('notify_web_clients', {'serial_value': SERIAL, 'paired_status': PAIRED_STATUS, 'usb_state': USB_STATE}, broadcast=True, namespace='/web')
+        #emit('update_lcd', {'serial_value': SERIAL}, broadcast=True, namespace='/usb') 
+        #emit('update_lcd', broadcast=True, namespace='/usb')
 
 
 #####################################################################
@@ -70,16 +94,20 @@ def usb_connect():
 
         node_command = 'get_status'
         emit('server_pull_node', {'node_command': node_command, 'serial_value': SERIAL}, broadcast=True, namespace='/node')
+        emit('update_lcd', {'serial_value': SERIAL}, broadcast=True, namespace='/usb') 
+        #emit('update_lcd', broadcast=True, namespace='/usb')
 
     else:
-        emit('notify_web_clients', {'serial_value': SERIAL, 'paired_status': PAIRED_STATUS, 'usb_state': USB_STATE}, broadcast=True, namespace='/web') 
+        emit('notify_web_clients', {'serial_value': SERIAL, 'paired_status': PAIRED_STATUS, 'usb_state': USB_STATE}, broadcast=True, namespace='/web')
+        emit('update_lcd', {'serial_value': SERIAL}, broadcast=True, namespace='/usb') 
+        #emit('update_lcd', broadcast=True, namespace='/usb')
 
 
 #####################################################################
-#  Events when usb clients connect to server (namespace='/node')
+#  Events when node clients connect to server (namespace='/node')
 #####################################################################
 @socketio.on('connect', namespace='/node')
-def usb_connect():
+def node_connect():
     global USB_STATE, SERIAL, PAIRED_STATUS
 
     print('Node Client Connected')
@@ -116,6 +144,8 @@ def usb_update(message):
         # send serial_value and get_status command to node
         node_command = 'get_status'
         emit('server_pull_node', {'node_command': node_command, 'serial_value': SERIAL}, broadcast=True, namespace='/node')
+        emit('update_lcd', {'serial_value': SERIAL}, broadcast=True, namespace='/usb') 
+        #emit('update_lcd', broadcast=True, namespace='/usb')
 
     # if usb is disconnected, don't need to check paired_status with Node, can just send info to web clients
     elif USB_STATE in 'no_device':
@@ -123,6 +153,8 @@ def usb_update(message):
         SERIAL = "no_device"
         # Send info to web clients
         emit('notify_web_clients', {'serial_value': SERIAL, 'paired_status': PAIRED_STATUS, 'usb_state': USB_STATE}, broadcast=True, namespace='/web')
+        emit('update_lcd', {'serial_value': SERIAL}, broadcast=True, namespace='/usb') 
+        #emit('update_lcd', broadcast=True, namespace='/usb')
 
 
 
@@ -195,7 +227,55 @@ def web_disconnect():
     print('USB Client Disconnected')
 
 
+def get_ip_address(ifname):
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    raw_ip = socket.inet_ntoa(fcntl.ioctl(
+        s.fileno(),
+        0x8915,  # SIOCGIFADDR
+        struct.pack('256s', ifname[:15])
+    )[20:24])
+
+    pretty_ip = 'ip: ' + raw_ip
+
+    return pretty_ip
+
+
+def get_hostname():
+    raw_hostname = socket.gethostname()
+    pretty_hostname = 'host: ' + raw_hostname
+    return pretty_hostname
+
+
+
+def get_device_type():
+    path = os.getcwd()
+    files = os.listdir(path)
+    if 'usb_client.py' in files:
+        device_type = 'usb_client'
+    elif 'node_client.py' in files:
+        device_type = 'node'
+    elif 'server.py' in files:
+        device_type = 'server'
+    else:
+        device_type = 'unknown'
+    device_type = 'type: ' + device_type
+    return device_type
+
+def write_to_lcd(ifname):
+
+    lcd = CharLCD()
+
+    lcd.clear()
+    lcd.home()
+    lcd.write_string(get_hostname())
+    lcd.cursor_pos = (1, 0)
+    lcd.write_string(get_device_type())
+    lcd.cursor_pos = (2, 0)
+    lcd.write_string(get_ip_address(ifname))
+    #print("LCD SHOULD BE UPDATED")
+
 if __name__ == '__main__':
+    #write_to_lcd('eth0')
     socketio.run(app, host='0.0.0.0', use_reloader=True, debug=True, extra_files=['static/js/app.js', 'templates/index.html',], port=5000)
 
 
